@@ -1,0 +1,32 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+
+# Send a GET request to the URL
+response = requests.get("https://en.wikipedia.org/wiki/List_of_largest_companies_in_the_United_States_by_revenue")
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Find the table containing the financial data
+#table = soup.find('table', {'class': 'relative w-full overflow-x-auto'})
+
+table = soup.find_all('table', class_ =  'wikitable sortable')
+
+# Extract the headers
+headers = table[0].find_all('th')
+
+header_titles = [title.text.strip() for title in headers]
+
+
+df = pd.DataFrame(columns = header_titles)   
+
+print(df)
+column_data = table[0].find_all('tr')    
+
+for row in column_data[1:]:
+    row_data = row.find_all('td')
+    single_row_data = [data.text.strip() for data in row_data]
+    length = len(df)
+    df.loc[length] = single_row_data
+print(df)   
+df.to_excel(('List of largest companies in the United States by revenue.xlsx'), index = False)  
